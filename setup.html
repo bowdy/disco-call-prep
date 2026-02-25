@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discovery Call Prep — Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-start justify-center px-4 py-10">
+    <div class="w-full max-w-2xl">
+
+        <!-- Progress Bar -->
+        <div id="progress-bar" class="mb-8 hidden">
+            <div class="flex items-center justify-between mb-2">
+                <span id="progress-label" class="text-sm text-slate-400">Step 1 of 8</span>
+                <span id="progress-percent" class="text-sm text-slate-400">0%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+                <div id="progress-fill" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Step 1: Welcome -->
+        <div class="step active fade-in" data-step="1">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <div class="mb-6">
+                    <h1 class="text-3xl font-bold text-slate-900 mb-2">Discovery Call Prep</h1>
+                    <p class="text-lg text-slate-500">Automated setup</p>
+                </div>
+                <p class="text-slate-600 mb-6">Get AI-powered prep documents for every discovery call, delivered to Slack before your day starts.</p>
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-start gap-3">
+                        <span class="mt-1 text-blue-500 text-lg">&#10003;</span>
+                        <span class="text-slate-700">Automatically pulls your calendar bookings each morning</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="mt-1 text-blue-500 text-lg">&#10003;</span>
+                        <span class="text-slate-700">Researches each prospect and their company</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="mt-1 text-blue-500 text-lg">&#10003;</span>
+                        <span class="text-slate-700">Generates a one-page prep doc with problems, questions, and solutions</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="mt-1 text-blue-500 text-lg">&#10003;</span>
+                        <span class="text-slate-700">Delivers to your Slack channel with a mobile notification</span>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-400 mb-6">Setup takes about 5 minutes. You'll need access to your Cal.com and Slack accounts.</p>
+                <button onclick="nextStep()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Cal.com API Key -->
+        <div class="step fade-in" data-step="2">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Connect Your Calendar</h2>
+                <p class="text-slate-500 mb-6">We'll read your bookings from Cal.com to know who you're meeting.</p>
+
+                <div class="bg-slate-50 rounded-xl p-5 mb-6">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">How to get your API key:</p>
+                    <ol class="text-sm text-slate-600 space-y-2 list-decimal list-inside">
+                        <li>Log in to <a href="https://cal.com/settings/developer/api-keys" target="_blank" class="text-blue-600 underline">cal.com/settings/developer/api-keys</a></li>
+                        <li>Click <strong>"Create API Key"</strong></li>
+                        <li>Name it <strong>"Discovery Call Prep"</strong></li>
+                        <li>Set expiration to <strong>"Never"</strong> (or a far future date)</li>
+                        <li>Copy the key and paste it below</li>
+                    </ol>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cal.com API Key</label>
+                    <div class="relative">
+                        <input type="password" id="cal_api_key" placeholder="cal_live_xxxx" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm">
+                        <button onclick="toggleVisibility('cal_api_key')" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">show</button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">We only read your bookings — no changes are made to your calendar.</p>
+                </div>
+
+                <button onclick="testCalConnection()" id="test-cal-btn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg transition text-sm mb-2">
+                    Test Connection
+                </button>
+                <div id="cal-status" class="text-sm mb-6 min-h-[24px]"></div>
+
+                <div class="flex gap-3">
+                    <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                    <button onclick="nextStep()" id="cal-next" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Create Slack App -->
+        <div class="step fade-in" data-step="3">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Create a Slack App</h2>
+                <p class="text-slate-500 mb-6">We need a Slack bot to deliver prep documents to your team.</p>
+
+                <div class="bg-slate-50 rounded-xl p-5 mb-6">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Follow these steps in Slack:</p>
+                    <ol class="text-sm text-slate-600 space-y-2 list-decimal list-inside">
+                        <li>Go to <a href="https://api.slack.com/apps" target="_blank" class="text-blue-600 underline">api.slack.com/apps</a></li>
+                        <li>Click <strong>"Create New App"</strong> &rarr; <strong>"From scratch"</strong></li>
+                        <li>Name it <strong>"Discovery Call Prep"</strong> and select your workspace</li>
+                        <li>Go to <strong>"OAuth &amp; Permissions"</strong> in the sidebar</li>
+                        <li>Under <strong>"Bot Token Scopes"</strong>, add these two scopes:
+                            <div class="mt-1 flex gap-2">
+                                <code class="bg-slate-200 px-2 py-0.5 rounded text-xs">files:write</code>
+                                <code class="bg-slate-200 px-2 py-0.5 rounded text-xs">chat:write</code>
+                            </div>
+                        </li>
+                        <li>Scroll up and click <strong>"Install to Workspace"</strong> &rarr; <strong>"Allow"</strong></li>
+                        <li>Copy the <strong>"Bot User OAuth Token"</strong> (starts with <code class="bg-slate-200 px-1 rounded text-xs">xoxb-</code>)</li>
+                    </ol>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                    <button onclick="nextStep()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">I've Done This — Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Slack Bot Token -->
+        <div class="step fade-in" data-step="4">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Enter Your Slack Bot Token</h2>
+                <p class="text-slate-500 mb-6">Paste the Bot User OAuth Token you copied in the previous step.</p>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Bot User OAuth Token</label>
+                    <div class="relative">
+                        <input type="password" id="slack_bot_token" placeholder="xoxb-xxxx-xxxx-xxxx" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm">
+                        <button onclick="toggleVisibility('slack_bot_token')" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">show</button>
+                    </div>
+                </div>
+
+                <button onclick="testSlackConnection()" id="test-slack-btn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg transition text-sm mb-2">
+                    Test Connection
+                </button>
+                <div id="slack-status" class="text-sm mb-6 min-h-[24px]"></div>
+
+                <div class="flex gap-3">
+                    <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                    <button onclick="nextStep()" id="slack-next" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Slack Channel -->
+        <div class="step fade-in" data-step="5">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Set Up Your Channel</h2>
+                <p class="text-slate-500 mb-6">Create a Slack channel where prep documents will be delivered.</p>
+
+                <div class="bg-slate-50 rounded-xl p-5 mb-6">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Quick steps:</p>
+                    <ol class="text-sm text-slate-600 space-y-2 list-decimal list-inside">
+                        <li>In Slack, create a new channel (e.g., <strong>#disco-call-prep</strong>)</li>
+                        <li>Open the channel and click the <strong>channel name</strong> at the top</li>
+                        <li>Go to <strong>"Integrations"</strong> &rarr; <strong>"Add apps"</strong></li>
+                        <li>Find and add <strong>"Discovery Call Prep"</strong></li>
+                    </ol>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Channel Name</label>
+                    <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden">
+                        <span class="bg-slate-50 text-slate-400 px-3 py-3 text-sm border-r border-slate-300">#</span>
+                        <input type="text" id="slack_channel" value="disco-call-prep" class="flex-1 px-3 py-3 text-slate-900 text-sm border-0">
+                    </div>
+                </div>
+
+                <button onclick="testSlackChannel()" id="test-channel-btn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg transition text-sm mb-2">
+                    Send Test Message
+                </button>
+                <div id="channel-status" class="text-sm mb-6 min-h-[24px]"></div>
+
+                <div class="flex gap-3">
+                    <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                    <button onclick="nextStep()" id="channel-next" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: Business Context -->
+        <div class="step fade-in" data-step="6">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Tell Us About Your Business</h2>
+                <p class="text-slate-500 mb-6">This helps the AI tailor prep documents to your company and services.</p>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Company Name <span class="text-red-400">*</span></label>
+                        <input type="text" id="company_name" placeholder="e.g., Acme Corp" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">What does your company do? <span class="text-red-400">*</span></label>
+                        <textarea id="company_description" rows="2" placeholder="e.g., We provide marketing automation for e-commerce brands..." class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">What services or products do you offer? <span class="text-red-400">*</span></label>
+                        <textarea id="services" rows="2" placeholder="e.g., Email campaigns, landing pages, conversion optimization..." class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Who is your ideal customer? <span class="text-red-400">*</span></label>
+                        <textarea id="target_customer" rows="2" placeholder="e.g., Mid-market e-commerce companies doing $1M-$10M revenue..." class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Any additional context? <span class="text-slate-400">(optional)</span></label>
+                        <textarea id="additional_context" rows="2" placeholder="e.g., Industries you focus on, common objections you hear, company values..." class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                    <button onclick="validateBusinessAndNext()" id="business-next" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                </div>
+                <div id="business-status" class="text-sm mt-2 min-h-[24px]"></div>
+            </div>
+        </div>
+
+        <!-- Step 7: Settings -->
+        <div class="step fade-in" data-step="7">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Notification Settings</h2>
+                <p class="text-slate-500 mb-6">Choose when you'd like to receive your prep documents.</p>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Your Timezone</label>
+                        <select id="timezone" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm bg-white">
+                            <option value="America/New_York">Eastern Time (ET)</option>
+                            <option value="America/Chicago">Central Time (CT)</option>
+                            <option value="America/Denver">Mountain Time (MT)</option>
+                            <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                            <option value="Europe/London">London (GMT/BST)</option>
+                            <option value="Europe/Paris">Central European (CET)</option>
+                            <option value="Europe/Berlin">Berlin (CET)</option>
+                            <option value="Australia/Sydney">Sydney (AEST)</option>
+                            <option value="Asia/Tokyo">Tokyo (JST)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Daily Notification Time</label>
+                        <select id="notification_time" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 text-sm bg-white">
+                            <option value="06:00">6:00 AM</option>
+                            <option value="06:30">6:30 AM</option>
+                            <option value="07:00" selected>7:00 AM</option>
+                            <option value="07:30">7:30 AM</option>
+                            <option value="08:00">8:00 AM</option>
+                            <option value="08:30">8:30 AM</option>
+                            <option value="09:00">9:00 AM</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="weekdays_only" checked class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                        <label for="weekdays_only" class="text-sm text-slate-700">Weekdays only (Monday–Friday)</label>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-xl p-4 mb-6">
+                    <p class="text-sm text-blue-700" id="schedule-preview">Prep docs will be delivered at 7:00 AM ET, Monday–Friday</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                    <button onclick="nextStep()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 8: Review & Activate -->
+        <div class="step fade-in" data-step="8">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Review &amp; Activate</h2>
+                <p class="text-slate-500 mb-6">Everything looks good? Hit activate to start receiving prep docs.</p>
+
+                <div class="space-y-3 mb-8">
+                    <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-700">Cal.com</p>
+                            <p class="text-xs text-slate-400" id="review-cal">Connected</p>
+                        </div>
+                        <span class="text-green-500 text-lg">&#10003;</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-700">Slack</p>
+                            <p class="text-xs text-slate-400" id="review-slack">Connected</p>
+                        </div>
+                        <span class="text-green-500 text-lg">&#10003;</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-700">Channel</p>
+                            <p class="text-xs text-slate-400" id="review-channel">#disco-call-prep</p>
+                        </div>
+                        <span class="text-green-500 text-lg">&#10003;</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-700">Business</p>
+                            <p class="text-xs text-slate-400" id="review-business">Company Name</p>
+                        </div>
+                        <span class="text-green-500 text-lg">&#10003;</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-700">Schedule</p>
+                            <p class="text-xs text-slate-400" id="review-schedule">7:00 AM ET, Mon–Fri</p>
+                        </div>
+                        <span class="text-green-500 text-lg">&#10003;</span>
+                    </div>
+                </div>
+
+                <div id="activate-area">
+                    <div class="flex gap-3">
+                        <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
+                        <button onclick="activateClient()" id="activate-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">Activate</button>
+                    </div>
+                    <div id="activate-status" class="text-sm mt-3 min-h-[24px]"></div>
+                </div>
+
+                <!-- Success state (hidden until activation) -->
+                <div id="success-area" class="hidden text-center">
+                    <div class="bg-green-50 rounded-xl p-6 mb-4">
+                        <div class="text-4xl mb-3">&#10004;</div>
+                        <h3 class="text-xl font-bold text-green-800 mb-2">You're All Set!</h3>
+                        <p class="text-green-700 text-sm">Your first prep document will arrive in Slack before your next discovery call.</p>
+                    </div>
+                    <p class="text-xs text-slate-400">You can close this page. Setup is complete.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- State ---
+        let currentStep = 1;
+        const totalSteps = 8;
+        let setupToken = null;
+        let clientId = null;
+        let slackTeamName = '';
+
+        // API base URL — points to Modal backend
+        const API_BASE = 'https://bowdy--disco-call-prep-api.modal.run';
+
+        // Read setup token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+            setupToken = tokenFromUrl;
+        }
+
+        // --- Navigation ---
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            const target = document.querySelector(`[data-step="${step}"]`);
+            if (target) {
+                target.classList.add('active');
+                target.classList.remove('fade-in');
+                void target.offsetWidth; // trigger reflow
+                target.classList.add('fade-in');
+            }
+            currentStep = step;
+            updateProgress();
+
+            // Populate review step
+            if (step === 8) populateReview();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) showStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            if (currentStep > 1) showStep(currentStep - 1);
+        }
+
+        function updateProgress() {
+            const bar = document.getElementById('progress-bar');
+            if (currentStep === 1) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
+            const pct = Math.round(((currentStep - 1) / (totalSteps - 1)) * 100);
+            document.getElementById('progress-label').textContent = `Step ${currentStep} of ${totalSteps}`;
+            document.getElementById('progress-percent').textContent = `${pct}%`;
+            document.getElementById('progress-fill').style.width = `${pct}%`;
+        }
+
+        // --- Visibility Toggle ---
+        function toggleVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'hide';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'show';
+            }
+        }
+
+        // --- API Helpers ---
+        async function apiCall(action, body) {
+            const resp = await fetch(API_BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...body }),
+            });
+            return resp.json();
+        }
+
+        function showStatus(id, message, success) {
+            const el = document.getElementById(id);
+            el.textContent = message;
+            el.className = `text-sm mb-6 min-h-[24px] ${success ? 'text-green-600' : 'text-red-500'}`;
+        }
+
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.dataset.original = btn.textContent;
+                btn.textContent = 'Testing...';
+                btn.disabled = true;
+            } else {
+                btn.textContent = btn.dataset.original || 'Test Connection';
+                btn.disabled = false;
+            }
+        }
+
+        // --- Test Cal.com ---
+        async function testCalConnection() {
+            const key = document.getElementById('cal_api_key').value.trim();
+            if (!key) {
+                showStatus('cal-status', 'Please enter your Cal.com API key.', false);
+                return;
+            }
+            setLoading('test-cal-btn', true);
+            try {
+                const result = await apiCall('test_cal', { setup_token: setupToken, cal_api_key: key });
+                if (result.success) {
+                    showStatus('cal-status', result.message, true);
+                    document.getElementById('cal-next').disabled = false;
+                } else {
+                    showStatus('cal-status', result.message || 'Connection failed. Check your API key.', false);
+                }
+            } catch (e) {
+                showStatus('cal-status', 'Network error. Please try again.', false);
+            }
+            setLoading('test-cal-btn', false);
+        }
+
+        // --- Test Slack Token ---
+        async function testSlackConnection() {
+            const token = document.getElementById('slack_bot_token').value.trim();
+            if (!token || !token.startsWith('xoxb-')) {
+                showStatus('slack-status', 'Please enter a valid bot token (starts with xoxb-).', false);
+                return;
+            }
+            setLoading('test-slack-btn', true);
+            try {
+                const result = await apiCall('test_slack', { setup_token: setupToken, slack_bot_token: token });
+                if (result.success) {
+                    slackTeamName = result.team || '';
+                    showStatus('slack-status', `Connected to ${result.team || 'workspace'}`, true);
+                    document.getElementById('slack-next').disabled = false;
+                } else {
+                    showStatus('slack-status', result.message || 'Connection failed. Check your token.', false);
+                }
+            } catch (e) {
+                showStatus('slack-status', 'Network error. Please try again.', false);
+            }
+            setLoading('test-slack-btn', false);
+        }
+
+        // --- Test Slack Channel ---
+        async function testSlackChannel() {
+            const token = document.getElementById('slack_bot_token').value.trim();
+            const channel = '#' + document.getElementById('slack_channel').value.trim().replace(/^#/, '');
+            if (!channel || channel === '#') {
+                showStatus('channel-status', 'Please enter a channel name.', false);
+                return;
+            }
+            setLoading('test-channel-btn', true);
+            try {
+                const result = await apiCall('test_channel', {
+                    setup_token: setupToken,
+                    slack_bot_token: token,
+                    slack_channel: channel,
+                });
+                if (result.success) {
+                    showStatus('channel-status', result.message, true);
+                    document.getElementById('channel-next').disabled = false;
+                } else {
+                    let msg = result.message || 'Failed to send test message.';
+                    if (msg.includes('not_in_channel')) {
+                        msg = 'Bot is not in this channel. Add the app to the channel first (see instructions above).';
+                    } else if (msg.includes('channel_not_found')) {
+                        msg = 'Channel not found. Make sure the channel exists and the name is correct.';
+                    }
+                    showStatus('channel-status', msg, false);
+                }
+            } catch (e) {
+                showStatus('channel-status', 'Network error. Please try again.', false);
+            }
+            setLoading('test-channel-btn', false);
+        }
+
+        // --- Business Validation ---
+        function validateBusinessAndNext() {
+            const name = document.getElementById('company_name').value.trim();
+            const desc = document.getElementById('company_description').value.trim();
+            const svc = document.getElementById('services').value.trim();
+            const target = document.getElementById('target_customer').value.trim();
+
+            if (!name || !desc || !svc || !target) {
+                showStatus('business-status', 'Please fill in all required fields.', false);
+                return;
+            }
+            document.getElementById('business-status').textContent = '';
+            nextStep();
+        }
+
+        // --- Schedule Preview ---
+        function updateSchedulePreview() {
+            const tz = document.getElementById('timezone');
+            const time = document.getElementById('notification_time');
+            const weekdays = document.getElementById('weekdays_only');
+
+            const tzLabel = tz.options[tz.selectedIndex].text.match(/\(([^)]+)\)/)?.[1] || '';
+            const timeLabel = time.options[time.selectedIndex].text;
+            const days = weekdays.checked ? 'Monday\u2013Friday' : 'Every day';
+
+            document.getElementById('schedule-preview').textContent =
+                `Prep docs will be delivered at ${timeLabel} ${tzLabel}, ${days}`;
+        }
+
+        // Add listeners after DOM ready
+        document.getElementById('timezone')?.addEventListener('change', updateSchedulePreview);
+        document.getElementById('notification_time')?.addEventListener('change', updateSchedulePreview);
+        document.getElementById('weekdays_only')?.addEventListener('change', updateSchedulePreview);
+
+        // --- Auto-detect timezone ---
+        try {
+            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const tzSelect = document.getElementById('timezone');
+            for (let opt of tzSelect.options) {
+                if (opt.value === userTz) {
+                    opt.selected = true;
+                    updateSchedulePreview();
+                    break;
+                }
+            }
+        } catch (e) {}
+
+        // --- Populate Review ---
+        function populateReview() {
+            const calKey = document.getElementById('cal_api_key').value.trim();
+            document.getElementById('review-cal').textContent = calKey ? `Connected (${calKey.substring(0, 12)}...)` : 'Not connected';
+
+            document.getElementById('review-slack').textContent = slackTeamName ? `Connected to ${slackTeamName}` : 'Connected';
+
+            const channel = '#' + document.getElementById('slack_channel').value.trim().replace(/^#/, '');
+            document.getElementById('review-channel').textContent = channel;
+
+            const companyName = document.getElementById('company_name').value.trim();
+            const desc = document.getElementById('company_description').value.trim();
+            document.getElementById('review-business').textContent = companyName + (desc ? ` \u2014 ${desc.substring(0, 60)}...` : '');
+
+            document.getElementById('review-schedule').textContent = document.getElementById('schedule-preview').textContent.replace('Prep docs will be delivered at ', '');
+        }
+
+        // --- Compute UTC hour ---
+        function computeUtcHour(timezone, localTime) {
+            const [hour, minute] = localTime.split(':').map(Number);
+            // Create a date in the target timezone and find the UTC offset
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+
+            try {
+                const localDate = new Date(new Date(dateStr).toLocaleString('en-US', { timeZone: timezone }));
+                const utcDate = new Date(dateStr);
+                const diffMs = utcDate - localDate;
+                let utcHour = (hour + Math.round(diffMs / 3600000)) % 24;
+                if (utcHour < 0) utcHour += 24;
+                return utcHour;
+            } catch (e) {
+                // Fallback: simple offset map
+                const offsets = {
+                    'America/New_York': 5, 'America/Chicago': 6, 'America/Denver': 7,
+                    'America/Los_Angeles': 8, 'Europe/London': 0, 'Europe/Paris': -1,
+                    'Europe/Berlin': -1, 'Australia/Sydney': -11, 'Asia/Tokyo': -9,
+                };
+                const offset = offsets[timezone] || 5;
+                return (hour + offset) % 24;
+            }
+        }
+
+        // --- Activate ---
+        async function activateClient() {
+            const btn = document.getElementById('activate-btn');
+            btn.textContent = 'Activating...';
+            btn.disabled = true;
+
+            const timezone = document.getElementById('timezone').value;
+            const notificationTime = document.getElementById('notification_time').value;
+
+            const payload = {
+                setup_token: setupToken,
+                cal_api_key: document.getElementById('cal_api_key').value.trim(),
+                slack_bot_token: document.getElementById('slack_bot_token').value.trim(),
+                slack_channel: '#' + document.getElementById('slack_channel').value.trim().replace(/^#/, ''),
+                business_context: {
+                    company_name: document.getElementById('company_name').value.trim(),
+                    company_description: document.getElementById('company_description').value.trim(),
+                    services: document.getElementById('services').value.trim(),
+                    target_customer: document.getElementById('target_customer').value.trim(),
+                    additional_context: document.getElementById('additional_context').value.trim(),
+                },
+                settings: {
+                    timezone: timezone,
+                    notification_time: notificationTime,
+                    weekdays_only: document.getElementById('weekdays_only').checked,
+                    notification_hour_utc: computeUtcHour(timezone, notificationTime),
+                },
+            };
+
+            try {
+                const result = await apiCall('activate', payload);
+                if (result.success) {
+                    document.getElementById('activate-area').classList.add('hidden');
+                    document.getElementById('success-area').classList.remove('hidden');
+                    document.getElementById('progress-fill').style.width = '100%';
+                    document.getElementById('progress-percent').textContent = '100%';
+                } else {
+                    showStatus('activate-status', result.detail || result.message || 'Activation failed. Please try again.', false);
+                    btn.textContent = 'Activate';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                showStatus('activate-status', 'Network error. Please try again.', false);
+                btn.textContent = 'Activate';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
