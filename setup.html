@@ -10,20 +10,20 @@
         .step.active { display: block; }
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); }
+        input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12); }
     </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex items-start justify-center px-4 py-10">
+<body class="bg-gray-50 min-h-screen flex items-start justify-center px-4 py-10">
     <div class="w-full max-w-2xl">
 
         <!-- Progress Bar -->
         <div id="progress-bar" class="mb-8 hidden">
             <div class="flex items-center justify-between mb-2">
-                <span id="progress-label" class="text-sm text-slate-400">Step 1 of 8</span>
-                <span id="progress-percent" class="text-sm text-slate-400">0%</span>
+                <span id="progress-label" class="text-sm text-gray-500">Step 1 of 8</span>
+                <span id="progress-percent" class="text-sm text-gray-500">0%</span>
             </div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-                <div id="progress-fill" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-fill" class="bg-black h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
         </div>
 
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <p class="text-sm text-slate-400 mb-6">Setup takes about 5 minutes. You'll need access to your Cal.com and Slack accounts.</p>
-                <button onclick="nextStep()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">Get Started</button>
+                <button onclick="nextStep()" class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition">Get Started</button>
             </div>
         </div>
 
@@ -91,7 +91,7 @@
 
                 <div class="flex gap-3">
                     <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
-                    <button onclick="nextStep()" id="cal-next" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                    <button onclick="nextStep()" id="cal-next" disabled class="flex-1 bg-black hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
                 </div>
             </div>
         </div>
@@ -122,7 +122,7 @@
 
                 <div class="flex gap-3">
                     <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
-                    <button onclick="nextStep()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">I've Done This — Next</button>
+                    <button onclick="nextStep()" class="flex-1 bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition">I've Done This — Next</button>
                 </div>
             </div>
         </div>
@@ -148,7 +148,7 @@
 
                 <div class="flex gap-3">
                     <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
-                    <button onclick="nextStep()" id="slack-next" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                    <button onclick="nextStep()" id="slack-next" disabled class="flex-1 bg-black hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
                 </div>
             </div>
         </div>
@@ -184,7 +184,7 @@
 
                 <div class="flex gap-3">
                     <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
-                    <button onclick="nextStep()" id="channel-next" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                    <button onclick="nextStep()" id="channel-next" disabled class="flex-1 bg-black hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
                 </div>
             </div>
         </div>
@@ -220,7 +220,7 @@
 
                 <div class="flex gap-3">
                     <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
-                    <button onclick="validateBusinessAndNext()" id="business-next" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                    <button onclick="validateBusinessAndNext()" id="business-next" class="flex-1 bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
                 </div>
                 <div id="business-status" class="text-sm mt-2 min-h-[24px]"></div>
             </div>
@@ -271,7 +271,7 @@
 
                 <div class="flex gap-3">
                     <button onclick="prevStep()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-6 rounded-lg transition">Back</button>
-                    <button onclick="nextStep()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
+                    <button onclick="nextStep()" class="flex-1 bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition">Next</button>
                 </div>
             </div>
         </div>
