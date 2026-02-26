@@ -100,18 +100,25 @@
 
             <!-- Right: Video Placeholder -->
             <div class="relative z-10">
-                <div class="bg-gray-50 border border-gray-200 rounded-2xl aspect-video flex items-center justify-center relative overflow-hidden">
-                    <!-- Play button -->
-                    <button onclick="playVideo()" class="group relative z-10 flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200 transition-all duration-300">
-                        <svg class="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
+                <div class="rounded-2xl aspect-video relative overflow-hidden bg-gray-100 border border-gray-200">
+                    <video
+                        id="promoVideo"
+                        class="w-full h-full object-cover rounded-2xl"
+                        src="promo.mp4"
+                        playsinline
+                        preload="metadata"
+                    ></video>
+                    <!-- Play button overlay -->
+                    <button id="playBtn" onclick="playVideo()" class="absolute inset-0 z-10 flex items-center justify-center group transition-opacity duration-300">
+                        <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 border border-gray-200 group-hover:bg-gray-200 transition-all duration-300">
+                            <svg class="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </div>
+                        <div class="absolute bottom-4 left-0 right-0 text-center">
+                            <span class="text-sm text-gray-400 font-medium">Watch the 2-minute demo</span>
+                        </div>
                     </button>
-
-                    <!-- "Watch demo" label -->
-                    <div class="absolute bottom-4 left-0 right-0 text-center">
-                        <span class="text-sm text-gray-400 font-medium">Watch the 2-minute demo</span>
-                    </div>
                 </div>
 
                 <!-- Social proof nudge -->
@@ -260,8 +267,28 @@
 
     <script>
         function playVideo() {
-            // Replace with actual video embed when ready
-            alert('Video coming soon! In the meantime, get started and we\'ll walk you through everything.');
+            const video = document.getElementById('promoVideo');
+            const playBtn = document.getElementById('playBtn');
+            video.play();
+            playBtn.style.opacity = '0';
+            playBtn.style.pointerEvents = 'none';
+
+            video.addEventListener('click', function() {
+                if (video.paused) {
+                    video.play();
+                    playBtn.style.opacity = '0';
+                    playBtn.style.pointerEvents = 'none';
+                } else {
+                    video.pause();
+                    playBtn.style.opacity = '1';
+                    playBtn.style.pointerEvents = 'auto';
+                }
+            });
+
+            video.addEventListener('ended', function() {
+                playBtn.style.opacity = '1';
+                playBtn.style.pointerEvents = 'auto';
+            });
         }
     </script>
 </body>
