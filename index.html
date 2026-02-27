@@ -18,6 +18,20 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+        .cta-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 min-h-screen overflow-x-hidden">
@@ -197,6 +211,80 @@
         </div>
     </section>
 
+    <!-- Try It Now Demo -->
+    <section id="demo" class="max-w-6xl mx-auto px-6 pb-28">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl font-bold text-gray-900 mb-3">Feel it in action for yourself</h2>
+            <p class="text-gray-500 max-w-xl mx-auto">Enter your details below and we'll generate a real prep doc about <em>you</em> &mdash; as if you just booked a discovery call with us.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8 items-start">
+            <!-- Left: Form -->
+            <div id="demoFormContainer" class="bg-gray-50 border border-gray-200 rounded-2xl p-8">
+                <form id="demoForm" onsubmit="runDemo(event)">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Work email *</label>
+                            <input type="email" id="demoEmail" required placeholder="you@company.com"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition">
+                            <p class="text-xs text-gray-400 mt-1">We use this to research your company. Use your work email for best results.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Phone number</label>
+                            <input type="tel" id="demoPhone" placeholder="+1 (555) 123-4567"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Your LinkedIn bio</label>
+                            <textarea id="demoLinkedin" rows="4" placeholder="Paste your LinkedIn About / summary here..."
+                                      class="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition resize-none"></textarea>
+                            <p class="text-xs text-gray-400 mt-1">Optional but makes the prep much better.</p>
+                        </div>
+                        <!-- Honeypot -->
+                        <input type="text" name="website" id="demoHoneypot" style="display:none" tabindex="-1" autocomplete="off">
+                        <button type="submit" id="demoSubmitBtn"
+                                class="cta-btn w-full px-6 py-4 rounded-xl text-lg font-semibold text-white flex items-center justify-center gap-2">
+                            Generate My Prep Doc
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Results (hidden initially) -->
+            <div id="demoResults" class="hidden">
+                <!-- Loading state -->
+                <div id="demoLoading" class="bg-gray-50 border border-gray-200 rounded-2xl p-8">
+                    <div class="space-y-5">
+                        <div id="stepResearch" class="flex items-center gap-3 text-gray-400 transition-colors duration-300">
+                            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                                <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            </div>
+                            <span>Researching your company...</span>
+                        </div>
+                        <div id="stepSynthesize" class="flex items-center gap-3 text-gray-400 transition-colors duration-300">
+                            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                                <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            </div>
+                            <span>Synthesizing prep notes with AI...</span>
+                        </div>
+                        <div id="stepComplete" class="flex items-center gap-3 text-gray-400 transition-colors duration-300">
+                            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                                <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            </div>
+                            <span>Building your prep doc...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actual results -->
+                <div id="demoOutput" class="hidden space-y-4"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- What's Included -->
     <section class="max-w-6xl mx-auto px-6 pb-28">
         <div class="bg-gray-50 border border-gray-200 rounded-2xl p-8 sm:p-12">
@@ -301,6 +389,124 @@
     </footer>
 
     <script>
+        const DEMO_API_URL = "https://bowdy--disco-call-prep-api.modal.run";
+
+        async function runDemo(e) {
+            e.preventDefault();
+
+            // Honeypot check
+            if (document.getElementById('demoHoneypot').value) return;
+
+            const email = document.getElementById('demoEmail').value.trim();
+            const phone = document.getElementById('demoPhone').value.trim();
+            const linkedin_bio = document.getElementById('demoLinkedin').value.trim();
+
+            if (!email) return;
+
+            // Disable button, show loading
+            const btn = document.getElementById('demoSubmitBtn');
+            const originalBtnHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Generating...';
+
+            const results = document.getElementById('demoResults');
+            const loading = document.getElementById('demoLoading');
+            const output = document.getElementById('demoOutput');
+
+            // Reset loading steps
+            ['stepResearch', 'stepSynthesize', 'stepComplete'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('text-gray-900');
+                el.classList.add('text-gray-400');
+                const dot = el.querySelector('.w-6');
+                dot.innerHTML = '<div class="w-2 h-2 rounded-full bg-gray-300"></div>';
+            });
+
+            results.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            output.classList.add('hidden');
+
+            // Scroll to results
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Animate steps with timed delays
+            activateStep('stepResearch', 0);
+            activateStep('stepSynthesize', 3000);
+            activateStep('stepComplete', 7000);
+
+            try {
+                const resp = await fetch(DEMO_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'demo', email, phone, linkedin_bio }),
+                });
+                const data = await resp.json();
+
+                if (data.success && data.prep && data.prep.person_summary) {
+                    loading.classList.add('hidden');
+                    renderPrepResults(data.prep);
+                    output.classList.remove('hidden');
+                } else {
+                    loading.innerHTML = '<div class="text-center py-4"><p class="text-red-500 font-medium">Something went wrong. Please try again.</p></div>';
+                }
+            } catch (err) {
+                loading.innerHTML = '<div class="text-center py-4"><p class="text-red-500 font-medium">Connection error. Please try again.</p></div>';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHTML;
+        }
+
+        function activateStep(id, delay) {
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.remove('text-gray-400');
+                el.classList.add('text-gray-900');
+                const dot = el.querySelector('.w-6');
+                if (dot) {
+                    dot.innerHTML = '<svg class="animate-spin w-4 h-4 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+                }
+            }, delay);
+        }
+
+        function renderPrepResults(prep) {
+            const output = document.getElementById('demoOutput');
+            const sections = [
+                { title: 'About You', content: prep.person_summary },
+                { title: 'Your Company', content: prep.company_summary },
+                { title: 'Conversation Opener', content: prep.conversation_opener },
+                { title: 'Likely Problems We Could Help With', content: prep.likely_problems },
+                { title: 'Discovery Questions We\'d Ask', content: prep.discovery_questions },
+                { title: 'Potential Solutions', content: prep.potential_solutions },
+                { title: 'Watch Outs', content: prep.watch_outs },
+            ];
+
+            output.innerHTML = '<div class="mb-4"><p class="text-sm font-semibold text-gray-900">Here\'s what we\'d prepare before meeting you:</p></div>' +
+                sections.map((s, i) => {
+                    const contentHtml = Array.isArray(s.content)
+                        ? '<ul class="list-disc list-inside space-y-1.5">' + s.content.map(item => '<li>' + escapeHtml(item) + '</li>').join('') + '</ul>'
+                        : '<p>' + escapeHtml(s.content || 'N/A') + '</p>';
+                    return '<div class="bg-gray-50 border border-gray-200 rounded-xl p-6" style="opacity:0;transform:translateY(10px);animation:fadeInUp 0.4s ease forwards ' + (i * 0.12) + 's;">' +
+                        '<h4 class="font-semibold text-gray-900 mb-2">' + s.title + '</h4>' +
+                        '<div class="text-sm text-gray-600 leading-relaxed">' + contentHtml + '</div>' +
+                        '</div>';
+                }).join('') +
+                '<div class="bg-black rounded-xl p-6 text-center" style="opacity:0;transform:translateY(10px);animation:fadeInUp 0.4s ease forwards ' + (sections.length * 0.12) + 's;">' +
+                    '<p class="text-white font-semibold mb-2">Imagine getting this for every call, automatically.</p>' +
+                    '<a href="https://buy.stripe.com/dRm5kDfw01vs2yGaaefAc0g" class="inline-flex items-center gap-2 text-white underline underline-offset-4 hover:no-underline">' +
+                        'Get Started &mdash; $399/year' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>' +
+                    '</a>' +
+                '</div>';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function playVideo() {
             const video = document.getElementById('promoVideo');
             const playBtn = document.getElementById('playBtn');
